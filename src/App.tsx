@@ -30,22 +30,22 @@ const App: React.FC = () => {
     return () => clearInterval(id);
   }, [timeLeft]);
 
-  // function
-  const addScore = () => {
-    setScore(score + timeLeft * stage);
-  };
-  const stageUp = () => {
-    setStage(stage + 1);
-    setTimeLeft(TIME_LEFT_INIT);
-  };
-  const wrongAnswer = () => {
-    setTimeLeft(timeLeft - 3);
+  // chooseAnswer
+  const chooseAnswer = {
+    rightAnswer: () => {
+      setScore(score + timeLeft * stage);
+      setStage(stage + 1);
+      setTimeLeft(TIME_LEFT_INIT);
+    },
+    wrongAnswer: () => {
+      setTimeLeft(timeLeft - 3);
+    },
   };
 
   return (
     <>
       <Header stage={stage} timeLeft={timeLeft} score={score} />
-      <Section stage={stage} />
+      <Section stage={stage} chooseAnswer={chooseAnswer} />
     </>
   );
 };
