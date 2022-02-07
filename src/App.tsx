@@ -28,7 +28,7 @@ const App: React.FC = () => {
       setScore(SCORE_INIT);
     }
     return () => clearInterval(id);
-  }, [timeLeft]);
+  }, [timeLeft, score, stage]);
 
   // chooseAnswer
   const chooseAnswer = {
