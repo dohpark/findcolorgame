@@ -49,10 +49,18 @@ const randomHSVGenerator = () => {
   return { H, S, V };
 };
 
+const twist = (RGB: number) => {
+  const rand = Math.round(Math.random());
+  return rand ? RGB - 24 : RGB + 24;
+};
+
 export const randomRGBGenerator = () => {
   const { H, S, V } = randomHSVGenerator();
   const { R, G, B } = HSVtoRGB(H, S, V);
-  return { R, G, B };
+  return {
+    original: `rgb(${R}, ${G}, ${B})`,
+    twist: `rgb(${twist(R)}, ${twist(G)}, ${twist(B)})`,
+  };
 };
 
 export const randomAnswerGenerator = (length: number) => {

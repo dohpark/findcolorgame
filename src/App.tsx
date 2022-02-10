@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import styled from "styled-components";
-import Block from "./components/Block";
 import Header from "./components/Header";
 import { randomAnswerGenerator, randomRGBGenerator } from "./utils";
 
@@ -22,6 +21,18 @@ const SectionContainer = styled.div`
   padding: 0;
 `;
 
+interface BlockProps extends React.HTMLAttributes<HTMLDivElement> {
+  backgroundColor: string;
+  width: number;
+}
+
+const BlockContainer = styled.div<BlockProps>`
+  background-color: ${(props) => props.backgroundColor};
+  width: ${(props) => `${props.width}px`};
+  height: ${(props) => `${props.width}px`};
+  margin: 2px;
+`;
+
 const App: React.FC = () => {
   const [stage, setStage] = useState(STAGE_INIT);
   const [score, setScore] = useState(SCORE_INIT);
@@ -29,31 +40,82 @@ const App: React.FC = () => {
 
   const getBlock = (stage: number) => {
     const blockPerLine = Math.floor((stage + 3) / 2);
+    const RGB = randomRGBGenerator();
+
     const width =
       (SECTION_WIDTH - 2 * BLOCK_MARGIN * blockPerLine) / blockPerLine;
     const arrayLength = blockPerLine ** 2;
+    const backgroundColor = RGB.original;
+    const answer = randomAnswerGenerator(arrayLength);
+    const answerBackgroundColor = RGB.twist;
 
-    return { width, arrayLength };
+    return {
+      width,
+      arrayLength,
+      backgroundColor,
+      answer,
+      answerBackgroundColor,
+    };
   };
 
-  const [block, setBlock] = useState({
-    width: getBlock(stage).width,
-    arrayLength: getBlock(stage).arrayLength,
-  });
-  const [RGB, setRGB] = useState({ r: 0, g: 0, b: 0 });
-  const [answer, setAnswer] = useState(0);
-  const [array, setArray] = useState(Array(block.arrayLength).fill(0));
-  const [clicked, setClicked] = useState(false);
+  const { width, arrayLength, backgroundColor, answer, answerBackgroundColor } =
+    getBlock(stage);
 
-  // stage
+  const [block, setBlock] = useState({
+    width,
+    arrayLength,
+    backgroundColor,
+    answer,
+    answerBackgroundColor,
+  });
+
+  const chooseAnswer = {
+    rightAnswer: () => {
+      setStage(stage + 1);
+      setScore(score + timeLeft * stage);
+      setTimeLeft(TIME_LEFT_INIT);
+    },
+    wrongAnswer: () => {
+      setTimeLeft(timeLeft - 3);
+    },
+  };
+
+  // array
+  let arrayCandidate = Array(block.arrayLength).fill({
+    backgroundColor: block.backgroundColor,
+    width: block.width,
+    onClickHandler: () => {
+      chooseAnswer.wrongAnswer();
+    },
+  });
+
+  arrayCandidate[block.answer] = {
+    backgroundColor: block.answerBackgroundColor,
+    width: block.width,
+    onClickHandler: () => {
+      chooseAnswer.rightAnswer();
+    },
+  };
+
+  const [array, setArray] = useState(arrayCandidate);
+
+  // stage별 block
   useEffect(() => {
+    const {
+      width,
+      arrayLength,
+      backgroundColor,
+      answer,
+      answerBackgroundColor,
+    } = getBlock(stage);
+
     setBlock({
-      width: getBlock(stage).width,
-      arrayLength: getBlock(stage).arrayLength,
+      width,
+      arrayLength,
+      backgroundColor,
+      answer,
+      answerBackgroundColor,
     });
-    const { R, G, B } = randomRGBGenerator();
-    setRGB({ r: R, g: G, b: B });
-    setAnswer(randomAnswerGenerator(block.arrayLength));
   }, [stage]);
 
   // timeLeft
@@ -61,14 +123,14 @@ const App: React.FC = () => {
     const id = setInterval(() => {
       setTimeLeft(timeLeft - 1);
     }, 1000);
-    if (timeLeft < -1111111111110) {
+    if (timeLeft < 0) {
       window.alert(`GAME OVER!\n스테이지: ${stage}, 점수: ${score}`);
       setStage(STAGE_INIT);
       setTimeLeft(TIME_LEFT_INIT);
       setScore(SCORE_INIT);
     }
     return () => clearInterval(id);
-  }, [timeLeft]);
+  }, [timeLeft, score, stage]);
 
   // array
   useEffect(() => {
@@ -86,15 +148,15 @@ const App: React.FC = () => {
 
     // array
     let arrayCandidate = Array(block.arrayLength).fill({
-      backgroundColor: `rgb(${RGB.r}, ${RGB.g}, ${RGB.b})`,
+      backgroundColor: block.backgroundColor,
       width: block.width,
       onClickHandler: () => {
         chooseAnswer.wrongAnswer();
       },
     });
 
-    arrayCandidate[answer] = {
-      backgroundColor: "black",
+    arrayCandidate[block.answer] = {
+      backgroundColor: block.answerBackgroundColor,
       width: block.width,
       onClickHandler: () => {
         chooseAnswer.rightAnswer();
@@ -102,10 +164,7 @@ const App: React.FC = () => {
     };
 
     setArray(arrayCandidate);
-    setClicked(true);
-  }, [timeLeft]);
-
-  // RGB, answer, block, score, stage, timeLeft, clicked
+  }, [timeLeft, block, score, stage]);
 
   /**
    *
@@ -127,10 +186,8 @@ const App: React.FC = () => {
    * 첫 렌더링 때 검정색으로 구성된 화면이 나오는데 이를 먼저 보여줘서 생기는 문제
    *
    * 해결방법 1
-   * 1. 첫번째 렌더링부터 완벽하게 시작하게 만들기
+   * stage >1 과 reset 활용하면 될듯
    *
-   * 해결방법 2
-   * 첫번째 렌더링을 아예 안보이게 한 후 두번째 렌더링부터 보여주기
    *
    *
    */
@@ -140,11 +197,13 @@ const App: React.FC = () => {
       <Header stage={stage} timeLeft={timeLeft} score={score} />
       <SectionContainer>
         {array.map((val, index) => (
-          <Block
+          <BlockContainer
             key={`${val.backgroundColor}${index}`}
             backgroundColor={val.backgroundColor}
             width={val.width}
-            onClick={val.onClickHandler}
+            onClick={() => {
+              val.onClickHandler();
+            }}
           />
         ))}
       </SectionContainer>
