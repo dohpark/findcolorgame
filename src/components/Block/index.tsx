@@ -12,16 +12,6 @@ const BlockContainer = styled.div<BlockProps>`
   margin: 2px;
 `;
 
-// const Block: React.FC<BlockProps> = ({ backgroundColor, width, onClick }) => {
-//   return (
-//     <BlockContainer
-//       backgroundColor={backgroundColor}
-//       width={width}
-//       onClick={onClick}
-//     />
-//   );
-// };
-
 const Block: React.FC<BlockProps> = ({ backgroundColor, width, onClick }) => {
   return (
     <BlockContainer

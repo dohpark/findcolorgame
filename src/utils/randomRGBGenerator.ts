@@ -49,20 +49,25 @@ const randomHSVGenerator = () => {
   return { H, S, V };
 };
 
-const twist = (RGB: number) => {
+const twist = (RGB: number, stage: number) => {
   const rand = Math.round(Math.random());
-  return rand ? RGB - 24 : RGB + 24;
+  const createGap = (stage: number) => {
+    const gap = 25 - Math.floor(stage / 3);
+    return gap >= 10 ? gap : 10;
+  };
+
+  const twistRGB = rand ? RGB - createGap(stage) : RGB + createGap(stage);
+
+  if (twistRGB < 0) return 1;
+  else if (twistRGB > 255) return 254;
+  else return twistRGB;
 };
 
-export const randomRGBGenerator = () => {
+export const randomRGBGenerator = (stage: number) => {
   const { H, S, V } = randomHSVGenerator();
   const { R, G, B } = HSVtoRGB(H, S, V);
   return {
     original: `rgb(${R}, ${G}, ${B})`,
-    twist: `rgb(${twist(R)}, ${twist(G)}, ${twist(B)})`,
+    twist: `rgb(${twist(R, stage)}, ${twist(G, stage)}, ${twist(B, stage)})`,
   };
-};
-
-export const randomAnswerGenerator = (length: number) => {
-  return Math.floor(Math.random() * length);
 };

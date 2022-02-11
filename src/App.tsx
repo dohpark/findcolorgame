@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useCallback } from "react";
 import styled from "styled-components";
+import Block from "./components/Block";
 import Header from "./components/Header";
-import { randomAnswerGenerator, randomRGBGenerator } from "./utils";
+import { randomAnswerGenerator } from "./utils/randomAnswerGenerator";
+import { randomRGBGenerator } from "./utils/randomRGBGenerator";
 
 // 상수
 const SECTION_WIDTH = 360;
@@ -12,6 +14,7 @@ const TIME_LEFT_INIT = 15;
 const STAGE_INIT = 1;
 const SCORE_INIT = 0;
 
+// styled-components
 const SectionContainer = styled.div`
   display: flex;
   flex-flow: row wrap;
@@ -21,18 +24,7 @@ const SectionContainer = styled.div`
   padding: 0;
 `;
 
-interface BlockProps extends React.HTMLAttributes<HTMLDivElement> {
-  backgroundColor: string;
-  width: number;
-}
-
-const BlockContainer = styled.div<BlockProps>`
-  background-color: ${(props) => props.backgroundColor};
-  width: ${(props) => `${props.width}px`};
-  height: ${(props) => `${props.width}px`};
-  margin: 2px;
-`;
-
+// function component
 const App: React.FC = () => {
   const [stage, setStage] = useState(STAGE_INIT);
   const [score, setScore] = useState(SCORE_INIT);
@@ -40,7 +32,7 @@ const App: React.FC = () => {
 
   const getBlock = (stage: number) => {
     const blockPerLine = Math.floor((stage + 3) / 2);
-    const RGB = randomRGBGenerator();
+    const RGB = randomRGBGenerator(stage);
 
     const width =
       (SECTION_WIDTH - 2 * BLOCK_MARGIN * blockPerLine) / blockPerLine;
@@ -70,6 +62,13 @@ const App: React.FC = () => {
   });
 
   const createArray = useCallback(() => {
+    // type
+    type arrayType = {
+      backgroundColor: string;
+      width: number;
+      onClickHandler: () => void;
+    }[];
+
     // choose answer
     const chooseAnswer = {
       rightAnswer: () => {
@@ -78,12 +77,13 @@ const App: React.FC = () => {
         setTimeLeft(TIME_LEFT_INIT);
       },
       wrongAnswer: () => {
-        setTimeLeft(timeLeft - 3);
+        if (timeLeft < 3) setTimeLeft(0);
+        else setTimeLeft(timeLeft - 3);
       },
     };
 
-    // array
-    let arrayCandidate = Array(block.arrayLength).fill({
+    // arrayCandidate
+    let arrayCandidate: arrayType = Array(block.arrayLength).fill({
       backgroundColor: block.backgroundColor,
       width: block.width,
       onClickHandler: () => {
@@ -98,6 +98,7 @@ const App: React.FC = () => {
         chooseAnswer.rightAnswer();
       },
     };
+
     return arrayCandidate;
   }, [block, score, stage, timeLeft]);
 
@@ -126,12 +127,12 @@ const App: React.FC = () => {
     }
   }, [stage, reset]);
 
-  // timeLeft
+  // timeLeft 세팅
   useEffect(() => {
     const id = setInterval(() => {
       setTimeLeft(timeLeft - 1);
     }, 1000);
-    if (timeLeft < 0) {
+    if (timeLeft <= 0) {
       window.alert(`GAME OVER!\n스테이지: ${stage}, 점수: ${score}`);
       setStage(STAGE_INIT);
       setTimeLeft(TIME_LEFT_INIT);
@@ -141,9 +142,10 @@ const App: React.FC = () => {
     return () => clearInterval(id);
   }, [timeLeft, score, stage]);
 
-  // array
+  // array 세팅
   useEffect(() => {
     setArray(createArray());
+    console.log(block);
   }, [createArray]);
 
   return (
@@ -151,7 +153,7 @@ const App: React.FC = () => {
       <Header stage={stage} timeLeft={timeLeft} score={score} />
       <SectionContainer>
         {array.map((val, index) => (
-          <BlockContainer
+          <Block
             key={`${val.backgroundColor}${index}`}
             backgroundColor={val.backgroundColor}
             width={val.width}
