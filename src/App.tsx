@@ -145,7 +145,6 @@ const App: React.FC = () => {
   // array 세팅
   useEffect(() => {
     setArray(createArray());
-    console.log(block);
   }, [createArray]);
 
   return (

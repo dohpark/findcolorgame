@@ -51,16 +51,17 @@ const randomHSVGenerator = () => {
 
 const twist = (RGB: number, stage: number) => {
   const rand = Math.round(Math.random());
-  const createGap = (stage: number) => {
-    const gap = 25 - Math.floor(stage / 3);
-    return gap >= 10 ? gap : 10;
-  };
+  const gap = 25 - Math.floor(stage / 4);
+  const gapWithLimit = gap >= 10 ? gap : 10;
+  const twistRGB = rand
+    ? RGB - gapWithLimit < 0
+      ? RGB + gapWithLimit
+      : RGB - gapWithLimit
+    : RGB + gapWithLimit > 255
+    ? RGB - gapWithLimit
+    : RGB + gapWithLimit;
 
-  const twistRGB = rand ? RGB - createGap(stage) : RGB + createGap(stage);
-
-  if (twistRGB < 0) return 1;
-  else if (twistRGB > 255) return 254;
-  else return twistRGB;
+  return twistRGB;
 };
 
 export const randomRGBGenerator = (stage: number) => {
