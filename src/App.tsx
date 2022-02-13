@@ -1,31 +1,21 @@
 import React, { useState, useEffect, useCallback } from "react";
-import styled from "styled-components";
 import Block from "./components/Block";
 import Header from "./components/Header";
+import Section from "./components/Section";
 import { randomAnswerGenerator } from "./utils/randomAnswerGenerator";
 import { randomRGBGenerator } from "./utils/randomRGBGenerator";
 
-// 상수
-const SECTION_WIDTH = 360;
-const SECTION_HEIGHT = 360;
-const BLOCK_MARGIN = 2;
-
-const TIME_LEFT_INIT = 15;
-const STAGE_INIT = 1;
-const SCORE_INIT = 0;
-
-// styled-components
-const SectionContainer = styled.div`
-  display: flex;
-  flex-flow: row wrap;
-  width: ${SECTION_WIDTH}px;
-  height: ${SECTION_HEIGHT}px;
-  margin: 0;
-  padding: 0;
-`;
-
 // function component
 const App: React.FC = () => {
+  // 상수
+  const SECTION_WIDTH_HEIGHT = 360;
+  const BLOCK_MARGIN = 2;
+
+  const TIME_LEFT_INIT = 15;
+  const STAGE_INIT = 1;
+  const SCORE_INIT = 0;
+
+  // state
   const [stage, setStage] = useState(STAGE_INIT);
   const [score, setScore] = useState(SCORE_INIT);
   const [timeLeft, setTimeLeft] = useState(TIME_LEFT_INIT);
@@ -35,7 +25,7 @@ const App: React.FC = () => {
     const RGB = randomRGBGenerator(stage);
 
     const width =
-      (SECTION_WIDTH - 2 * BLOCK_MARGIN * blockPerLine) / blockPerLine;
+      (SECTION_WIDTH_HEIGHT - 2 * BLOCK_MARGIN * blockPerLine) / blockPerLine;
     const arrayLength = blockPerLine ** 2;
     const backgroundColor = RGB.original;
     const answer = randomAnswerGenerator(arrayLength);
@@ -150,7 +140,7 @@ const App: React.FC = () => {
   return (
     <>
       <Header stage={stage} timeLeft={timeLeft} score={score} />
-      <SectionContainer>
+      <Section sectionWidthHeight={SECTION_WIDTH_HEIGHT}>
         {array.map((val, index) => (
           <Block
             key={`${val.backgroundColor}${index}`}
@@ -161,7 +151,7 @@ const App: React.FC = () => {
             }}
           />
         ))}
-      </SectionContainer>
+      </Section>
     </>
   );
 };

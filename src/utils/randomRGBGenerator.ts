@@ -53,7 +53,7 @@ const twist = (RGB: number, stage: number) => {
   const rand = Math.round(Math.random());
   const gap = 25 - Math.floor(stage / 4);
   const gapWithLimit = gap >= 10 ? gap : 10;
-  const twistRGB = rand
+  const twistColor = rand
     ? RGB - gapWithLimit < 0
       ? RGB + gapWithLimit
       : RGB - gapWithLimit
@@ -61,7 +61,7 @@ const twist = (RGB: number, stage: number) => {
     ? RGB - gapWithLimit
     : RGB + gapWithLimit;
 
-  return twistRGB;
+  return twistColor;
 };
 
 export const randomRGBGenerator = (stage: number) => {
